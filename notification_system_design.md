@@ -463,7 +463,72 @@ This improves frontend performance and reduces unnecessary data fetching.
 
 ---
 
-## Conclusion
 
-Using pagination, caching, and real-time updates together can significantly improve performance and reduce database load in large-scale notification systems.
+
+
+
+
+-----------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
+
+
+# Stage 5
+
+## Problems in the Given Implementation
+
+The current implementation processes notifications one by one.
+
+This can create several issues:
+
+* very slow for 50,000 students
+* backend load becomes high
+* email API failures can interrupt the process
+* poor scalability
+
+If the email API fails for some students, those students may not receive notifications.
+
+---
+
+## Better Approach
+
+A better solution is to first save all notifications in the database and then send emails asynchronously.
+
+This improves reliability because notification data is safely stored even if email sending fails.
+
+Emails and app notifications can be processed separately in the background.
+
+---
+
+## Should DB Save and Email Sending Happen Together?
+
+No.
+
+Saving notifications to the database should happen first because it is the most important operation.
+
+Email sending can happen later asynchronously because:
+
+* email APIs may fail
+* email sending is slower
+* notifications should not be lost
+
+---
+
+## Improved Pseudocode
+
+```python id="rq0dbm"
+function notify_all(student_ids, message):
+
+    for student_id in student_ids:
+
+        save_to_db(student_id, message)
+
+
+    for student_id in student_ids:
+
+        send_email(student_id, message)
+
+        push_to_app(student_id, message)
+```
+
+
 
