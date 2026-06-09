@@ -2,7 +2,7 @@ import Notification
 from "../models/Notification.js";
 
 import { Log }
-from "../../logging_middleware/logger.js";
+from "../logging_middleware/logger.js";
 
 export const createNotification =
 async (req, res) => {
