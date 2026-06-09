@@ -399,3 +399,71 @@ WHERE notificationType = 'Placement'
 AND createdAt >= NOW() - INTERVAL '7 days';
 ```
 
+
+
+-----------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
+
+
+# Stage 4
+
+## Problem
+
+Currently, notifications are fetched from the database every time the page loads.
+
+As the number of students increases, this creates:
+
+* high database load
+* slower API response
+* poor user experience
+
+---
+
+## Solutions to Improve Performance
+
+### 1. Pagination
+
+Instead of fetching all notifications together, notifications can be loaded in smaller batches.
+
+Example:
+
+* first 10 notifications
+* next 10 notifications
+
+This reduces database load and improves response time.
+
+---
+
+
+### 2. Real-Time Notifications
+
+Instead of repeatedly calling APIs, WebSockets or Socket.IO can be used.
+
+When a new notification arrives:
+
+* backend instantly pushes notification to frontend
+
+Advantages:
+
+* fewer API requests
+* reduced database load
+* better user experience
+
+Tradeoff:
+
+* persistent socket connections are required
+
+---
+
+### 3. Lazy Loading
+
+Older notifications can be loaded only when the user scrolls down.
+
+This improves frontend performance and reduces unnecessary data fetching.
+
+---
+
+## Conclusion
+
+Using pagination, caching, and real-time updates together can significantly improve performance and reduce database load in large-scale notification systems.
+
