@@ -18,7 +18,7 @@ async (req, res) => {
         });
 
         await Log(
-            "backend",
+            "full",
             "info",
             "controller",
             "Notification created"
@@ -54,6 +54,12 @@ async (req, res) => {
 
         const notifications =
         await Notification.find();
+          await Log(
+            "backend",
+            "info",
+            "controller",
+            "Notifications fetched"
+        );
 
         res.status(200).json({
             success: true,
@@ -62,6 +68,12 @@ async (req, res) => {
 
     }
     catch (error) {
+          await Log(
+            "backend",
+            "info",
+            "controller",
+            "Notifications fetched"
+        );
 
         res.status(500).json({
             success: false,
