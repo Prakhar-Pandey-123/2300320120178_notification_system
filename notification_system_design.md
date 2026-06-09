@@ -196,3 +196,206 @@ Whenever a new notification is created:
 3. Frontend instantly receives and displays the notification without page refresh
 
 This improves user experience and reduces repeated API calls.
+
+
+
+-----------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
+
+# Stage 2
+
+## Database Choice
+
+For this notification system, I would prefer using MongoDB as the database.
+
+MongoDB is suitable because:
+
+* Notifications are simple document-based data
+* Flexible schema support
+* Faster development for full stack applications
+* Good read and write performance
+
+Since notifications may increase very quickly in a real system, MongoDB can scale better horizontally compared to traditional relational databases.
+
+---
+
+## Notification Schema
+
+The notification collection can have the following structure:
+
+```js id="urjlwm"
+{
+  studentId: "1642",
+  title: "Placement Drive",
+  message: "Amazon placement drive starts tomorrow",
+  notificationType: "Placement",
+  isRead: false,
+  createdAt: Date
+}
+```
+
+---
+
+## Problems as Data Increases
+
+As the number of students and notifications grows, some problems may occur:
+
+* Slower query execution
+* Increased database load
+* Longer response times
+* Difficulty in sorting large amounts of notifications
+* Storage growth
+
+---
+
+## Solutions for Scaling
+
+To improve performance at larger scale:
+
+### 1. Indexing
+
+Indexes can be added on:
+
+* studentId
+* createdAt
+* isRead
+
+This helps in faster searching and sorting.
+
+---
+
+### 2. Pagination
+
+Instead of fetching all notifications at once, only limited notifications should be fetched.
+
+Example:
+
+* first 10 notifications
+* next 10 notifications
+
+This reduces server load.
+
+
+
+## Example Queries
+
+### Create Notification
+
+```js id="7p2v6v"
+db.notifications.insertOne({
+  studentId: "1642",
+  title: "Placement Drive",
+  message: "Amazon placement drive starts tomorrow",
+  notificationType: "Placement",
+  isRead: false
+})
+```
+
+---
+
+### Fetch Notifications of a Student
+
+```js id="p75k8r"
+db.notifications.find({
+  studentId: "1642"
+})
+```
+
+---
+
+### Mark Notification as Read
+
+```js id="n6b2a4"
+db.notifications.updateOne(
+  { _id: 101 },
+  {
+    $set: {
+      isRead: true
+    }
+  }
+)
+```
+
+
+
+-----------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
+
+
+# Stage 3
+
+## Query Analysis
+
+```sql 
+SELECT * FROM notifications
+WHERE studentID = 1642 AND isRead = false
+ORDER BY createdAt ASC;
+```
+
+This query is correct because it fetches unread notifications of a student and sorts them by time.
+
+---
+
+## Why is the Query Slow?
+
+The database now has millions of notifications.
+
+If proper indexing is not used, the database checks many rows one by one which makes the query slow.
+
+Sorting also becomes slower when data size increases.
+
+---
+
+## Better Solution
+
+A composite index can be added on:
+
+* studentID
+* isRead
+* createdAt
+
+```sql 
+CREATE INDEX idx_notifications
+ON notifications(studentID, isRead, createdAt);
+```
+
+This helps the database find data faster.
+
+---
+
+## Computation Cost
+
+Without index:
+
+* database scans many rows
+* slower performance
+
+With index:
+
+* faster searching
+* reduced scanning
+
+---
+
+## Should We Add Indexes on Every Column?
+
+No.
+
+Too many indexes can:
+
+* increase storage
+* slow down inserts and updates
+
+Indexes should only be added on important columns that are searched frequently.
+
+---
+
+## Query for Placement Notifications in Last 7 Days
+
+```sql 
+SELECT  studentID
+FROM notifications
+WHERE notificationType = 'Placement'
+AND createdAt >= NOW() - INTERVAL '7 days';
+```
+
